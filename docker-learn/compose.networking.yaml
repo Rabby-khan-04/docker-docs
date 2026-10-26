@@ -1,0 +1,41 @@
+# Smoke test: does a container reach another container by DNS name,
+# with no published port involved?
+#
+# This is the file from chapter 07, section 4. It is kept here so you can run
+# it exactly as printed in the docs.
+#
+# Run:
+#   docker compose up --abort-on-container-exit --exit-code-from client
+#
+# Clean up:
+#   docker compose down
+
+services:
+  # The API. Deliberately NOT published: nothing outside this network needs it.
+  api:
+    build:
+      context: .
+    image: docker-learn:1.0.0
+    init: true
+    environment:
+      APP_ENV: production
+    networks:
+      - appnet
+
+  # A throwaway client that proves name-based container-to-container networking.
+  client:
+    image: alpine:3.24
+    networks:
+      - appnet
+    # Runs once, prints, exits. wget exits non-zero if it cannot reach the API,
+    # which --exit-code-from turns into the command's exit status.
+    command: >
+      sh -c "wget -qO- http://api:3000/health"
+    depends_on:
+      - api
+
+networks:
+  # Compose creates this automatically and removes it on `compose down`.
+  # Named networks give automatic DNS, so `api` resolves without any config.
+  appnet:
+    driver: bridge

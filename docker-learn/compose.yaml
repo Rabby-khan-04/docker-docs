@@ -1,0 +1,51 @@
+# Base Compose file for chapters 15-17. Extended by compose.override.yaml in dev.
+# NOTE: no top-level `version:` key. It is obsolete in the Compose Specification
+# and modern Compose warns about it. This is Engine 29.8.2 / Compose v5.6.0.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: docker-learn:1.0.0
+    container_name: dl-api
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3080:3000"
+    environment:
+      APP_NAME: docker-learn
+      APP_ENV: production
+      PORT: "3000"
+    networks:
+      - appnet
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # A one-shot job: waits for the api to be healthy, then checks it once.
+  smoke:
+    image: alpine:3.24
+    networks:
+      - appnet
+    depends_on:
+      api:
+        condition: service_healthy
+    command: wget -qO- http://api:3000/health
+    restart: "no"
+
+networks:
+  appnet:
+    driver: bridge

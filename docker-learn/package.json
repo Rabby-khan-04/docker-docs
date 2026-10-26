@@ -1,0 +1,15 @@
+{
+  "name": "docker-learn",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tiny Node.js app used as the running example across the Docker learning docs",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

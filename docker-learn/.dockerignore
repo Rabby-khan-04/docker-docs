@@ -1,0 +1,35 @@
+# Files that must never be sent to the Docker daemon during `docker build`.
+# Everything here would otherwise be uploaded on every single build.
+
+# Dependencies are re-installed inside the image with `npm ci`
+node_modules
+npm-debug.log*
+
+# Docker files and local state
+Dockerfile
+Dockerfile.*
+.dockerignore
+docker-compose*.yml
+compose*.yaml
+compose*.yml
+
+# Local data, secrets and environment overrides
+.env
+.env.*
+*.pem
+*.key
+secrets/
+data/
+
+# Version control and editor noise
+.git
+.gitignore
+.vscode
+.idea
+*.swp
+
+# Docs and tests are not needed to run the server
+docs/
+tests/
+README.md
+*.md
